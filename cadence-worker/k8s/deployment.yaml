@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cadence-platform-worker
+  namespace: ai-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cadence-platform-worker
+  template:
+    metadata:
+      labels:
+        app: cadence-platform-worker
+    spec:
+      containers:
+        - name: cadence-platform-worker
+          image: asia-southeast1-docker.pkg.dev/sre-lab-493007/cadence/cadence-platform-worker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CADENCE_FRONTEND_HOST
+              value: "cadence-frontend.ai-platform.svc.cluster.local:7833"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
