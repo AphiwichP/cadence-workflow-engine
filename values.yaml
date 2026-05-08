@@ -1,0 +1,145 @@
+# Cadence Workflow Engine — values.yaml
+# Task #8.1: Deploy Cadence server with bundled Cassandra
+# Namespace: ai-platform | Cluster: sre-lab-cluster
+
+# ── Frontend service ──────────────────────────────────────────
+frontend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+# ── History service ───────────────────────────────────────────
+history:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+# ── Matching service ──────────────────────────────────────────
+matching:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+# ── Worker service ────────────────────────────────────────────
+worker:
+  replicas: 1
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+# ── Server config ─────────────────────────────────────────────
+config:
+  persistence:
+    numHistoryShards: 4
+    defaultStore: "default"
+    visibilityStore: "visibility"
+    advancedVisibilityStore: "visibility"   # ไม่ใช้ Elasticsearch
+
+    database:
+      driver: "cassandra"
+
+      cassandra:
+        # ชื่อ service จะเป็น <release-name>-cassandra.<namespace>.svc.cluster.local
+        hosts: "cadence-cassandra.ai-platform.svc.cluster.local"
+        port: 9042
+        keyspace: "cadence"
+        visibilityKeyspace: "cadence_visibility"
+        replicationFactor: 1
+        user: "cassandra"
+        password: "cassandra"
+        protoVersion: 4
+        maxConns: 10
+
+      elasticsearch:
+        enabled: false
+
+# ── Metrics + ServiceMonitor ──────────────────────────────────
+metrics:
+  enabled: true
+  port: 9090
+  serviceMonitor:
+    enabled: true
+    namespace: "monitoring"
+    scrapeInterval: 15s
+
+# ── Dynamic config ────────────────────────────────────────────
+dynamicConfig:
+  values:
+    system.minRetentionDays:
+      - value: 0
+        constraints: {}
+    system.writeVisibilityStoreName:
+      - value: "db"
+    system.readVisibilityStoreName:
+      - value: "db"
+
+# ── Schema jobs ───────────────────────────────────────────────
+schema:
+  serverJob:
+    enabled: true
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+  elasticSearchJob:
+    enabled: false   # ไม่ใช้ Elasticsearch
+
+# ── Disable unused sub-charts ─────────────────────────────────
+elasticsearch:
+  enabled: false
+
+kafka:
+  enabled: false
+
+# ── Bundled Cassandra ─────────────────────────────────────────
+cassandra:
+  enabled: true
+  replicaCount: 1
+
+  dbUser:
+    user: cassandra
+    password: "cassandra"
+
+  cluster:
+    name: cassandra
+    seedCount: 1
+    numTokens: 256
+    datacenter: dc1
+    rack: rack1
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+  persistence:
+    enabled: true
+    storageClass: "standard-rwo"   # GKE StorageClass ที่ cluster นี้ใช้
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi

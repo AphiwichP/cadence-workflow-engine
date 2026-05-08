@@ -1,0 +1,34 @@
+# ── Personal / Notes (ไม่ push ขึ้น repo) ────────────────────
+usecase.md
+runbook-custom-cadence-chart.md
+pause-resume.md
+CLAUDE.md
+
+# ── Secrets & Credentials ─────────────────────────────────────
+*.env
+.env.*
+*-secret.yaml
+*-credentials.json
+service-account*.json
+
+# ── Go ────────────────────────────────────────────────────────
+cadence-worker/cadence-worker   # binary ที่ build locally
+vendor/
+*.test
+*.out
+
+# ── Docker ───────────────────────────────────────────────────
+.dockerignore
+
+# ── Terraform (ถ้ามีในอนาคต) ──────────────────────────────────
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# ── OS / Editor ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cadence-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus   # ต้อง match กับ helm release name ของ kube-prometheus-stack
+spec:
+  groups:
+    - name: cadence.rules
+      rules:
+        - alert: CadenceWorkflowBacklogHigh
+          expr: sum(cadence_workflow_task_schedule_to_start_latency_count) by (domain) > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Cadence workflow backlog สูง (domain: {{ $labels.domain }})"
+            description: "Workflow backlog ใน domain {{ $labels.domain }} เกิน 100 tasks เป็นเวลา 5 นาที (ค่าปัจจุบัน: {{ $value }})"
+
+        - alert: CadenceWorkflowTimeoutRateHigh
+          expr: |
+            sum(rate(cadence_workflow_timeout_total[5m])) by (domain)
+            /
+            sum(rate(cadence_workflow_complete_total[5m])) by (domain)
+            * 100 > 5
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Cadence workflow timeout rate สูง (domain: {{ $labels.domain }})"
+            description: "Workflow timeout rate ใน domain {{ $labels.domain }} เกิน 5% (ค่าปัจจุบัน: {{ $value | humanize }}%)"
